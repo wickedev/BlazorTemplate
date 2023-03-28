@@ -1,0 +1,54 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
+@using MudBlazor
+
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+            OnClick="@((e) => DrawerToggle())" />
+        <MudLink Href="/" OnClick="CloseDrawer" Typo="Typo.h5" Class="ml-3" Color="Color.Inherit"
+            Underline="Underline.None">Blazor Template
+        </MudLink>
+        <MudSpacer />
+        <MudToggleIconButton @bind-Toggled="@_isDarkMode"
+                     Icon="@Icons.Material.Filled.DarkMode" Color="Color.Inherit" Title="Dark Mode"
+                     ToggledIcon="@Icons.Material.Filled.LightMode" ToggledColor="Color.Inherit" ToggledTitle="Light Mode"/>
+        <MudIconButton OnClick="NavigateToLogin" Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" />
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
+        <MudDrawerHeader/>
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private MudTheme _theme = new();
+    private bool _isDarkMode = true;
+    private bool _drawerOpen = false;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    void CloseDrawer()
+    {
+        _drawerOpen = false;
+    }
+
+    void NavigateToLogin()
+    {
+        CloseDrawer();
+        NavManager.NavigateTo("/login");
+    }
+}
