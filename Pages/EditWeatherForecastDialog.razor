@@ -1,0 +1,43 @@
+@using BlazorTemplate.Data
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@inject WeatherForecastService ForecastService
+
+
+<MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+    <MudDialog>
+        <DialogContent>
+            <MudTextField Label="Id" Value="WeatherForecast.Id" Disabled="true" />
+            <MudNumericField T="int" Label="Temp. (C)" Required="true" RequiredError="Temp. (C) is required!"
+                @bind-Value="WeatherForecast.TemperatureC" For="@(() => WeatherForecast.TemperatureC)" />
+            <MudTextField T="string" Label="Summary" @bind-Value="WeatherForecast.Summary"
+                For="@(() => WeatherForecast.Summary)" />
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Tertiary" OnClick="Submit">Edit</MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public WeatherForecast WeatherForecast { get; set; } = null!;
+    [Parameter] public EventCallback OnRefresh { get; set; }
+
+    private bool success = true;
+    private string[] errors = { };
+    private MudForm form = null!;
+
+    private async Task Submit()
+    {
+        await ForecastService.UpdateForecastAsync(WeatherForecast);
+        MudDialog?.Close(DialogResult.Ok(true));
+        await OnRefresh.InvokeAsync();
+    }
+    void Cancel()
+    {
+        MudDialog?.Cancel();
+        form.Reset();
+    }
+}

@@ -1,9 +1,111 @@
 ﻿@page "/"
+@using BlazorTemplate.Data
+@inject IJSRuntime jsRuntime
+@inject IDialogService DialogService
+@inject WeatherForecastService ForecastService
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Weather forecast</PageTitle>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
-<MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
-<MudAlert Severity="Severity.Normal">You can find documentation and examples on our website here: <MudLink
-        Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink>
-</MudAlert>
+<MudText Typo="Typo.h3" GutterBottom="true">Weather forecast</MudText>
+<MudText Class="mb-8">This component demonstrates fetching data from the server.</MudText>
+
+@if (forecasts == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+
+    <div Class="d-flex flex-column gap-4">
+    <div Class="d-flex flex-row">
+        <MudSpacer />
+        <MudButton @onclick="OpenCreateDialog" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.AddCircle"
+            IconColor="Color.Success">
+            Create
+        </MudButton>
+    </div>
+    <MudTable Items="forecasts" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            <MudTh>
+                <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                    SortBy="new Func<WeatherForecast, object>(x=>x.Id)">Id</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<WeatherForecast, object>(x=>x.TemperatureC)">Temp. (C)
+                </MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<WeatherForecast, object>(x=>x.TemperatureF)">Temp. (F)
+                </MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel InitialDirection="SortDirection.Ascending"
+                    SortBy="new Func<WeatherForecast, object>(x=>x.DateTimeAt)">Date</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<WeatherForecast, object>(x=>x.Summary!)">Summary</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                Edit / Delete
+            </MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Temp. (C)">@context.TemperatureC</MudTd>
+            <MudTd DataLabel="Temp. (F)">@context.TemperatureF</MudTd>
+            <MudTd DataLabel="Date">@context.DateTimeAt</MudTd>
+            <MudTd DataLabel="Summary">@context.Summary</MudTd>
+            <MudTd>
+                <MudLink Color="Color.Tertiary" @onclick="() => OpenEditDialog(context)">edit</MudLink>
+                /
+                <MudLink Color="Color.Error" @onclick="() => OpenDeleteDialog(context)">delete</MudLink>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+        </PagerContent>
+    </MudTable>
+</div>
+}
+
+@code {
+    private List<WeatherForecast>? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
+    }
+
+    private void OpenCreateDialog()
+    {
+        var parameters = new DialogParameters() { { "OnRefresh", new EventCallbackFactory().Create(this, OnRefresh) } };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<CreateWeatherForecastDialog>("Create Weather Forecast", parameters, options);
+    }
+
+    private void OpenEditDialog(WeatherForecast weatherForecast)
+    {
+        var parameters = new DialogParameters() {
+            {"OnRefresh", new EventCallbackFactory().Create(this, OnRefresh)},
+            {"WeatherForecast", weatherForecast}
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<EditWeatherForecastDialog>("Edit Weather Forecast", parameters, options);
+    }
+
+    private void OpenDeleteDialog(WeatherForecast weatherForecast)
+    {
+        var parameters = new DialogParameters() {
+            {"OnRefresh", new EventCallbackFactory().Create(this, OnRefresh)},
+            {"WeatherForecast", weatherForecast}
+            };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<DeleteWeatherForecastDialog>("Delete Weather Forecast", parameters, options);
+    }
+
+    private async Task OnRefresh()
+    {
+        await jsRuntime.InvokeAsync<string>("console.log", "hello world");
+        forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
+    }
+}
