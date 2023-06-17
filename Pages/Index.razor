@@ -19,10 +19,14 @@ else
     <div Class="d-flex flex-column gap-4">
     <div Class="d-flex flex-row">
         <MudSpacer />
-        <MudButton @onclick="OpenCreateDialog" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.AddCircle"
-            IconColor="Color.Success">
-            Create
-        </MudButton>
+        <AuthorizeView>
+            <Authorized>
+                <MudButton @onclick="OpenCreateDialog" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.AddCircle"
+                    IconColor="Color.Success">
+                    Create
+                </MudButton>
+            </Authorized>
+        </AuthorizeView>
     </div>
     <MudTable Items="forecasts" Hover="true" SortLabel="Sort By" Elevation="0">
         <HeaderContent>
@@ -45,9 +49,14 @@ else
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<WeatherForecast, object>(x=>x.Summary!)">Summary</MudTableSortLabel>
             </MudTh>
-            <MudTh>
-                Edit / Delete
-            </MudTh>
+            <AuthorizeView>
+                <Authorized>
+                    <MudTh>
+                        Edit / Delete
+                    </MudTh>
+                </Authorized>
+            </AuthorizeView>
+            
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
@@ -55,11 +64,15 @@ else
             <MudTd DataLabel="Temp. (F)">@context.TemperatureF</MudTd>
             <MudTd DataLabel="Date">@context.DateTimeAt</MudTd>
             <MudTd DataLabel="Summary">@context.Summary</MudTd>
-            <MudTd>
-                <MudLink Color="Color.Tertiary" @onclick="() => OpenEditDialog(context)">edit</MudLink>
-                /
-                <MudLink Color="Color.Error" @onclick="() => OpenDeleteDialog(context)">delete</MudLink>
-            </MudTd>
+            <AuthorizeView>
+                <Authorized Context="editdelete">
+                    <MudTd>
+                        <MudLink Color="Color.Tertiary" @onclick="() => OpenEditDialog(context)">edit</MudLink>
+                        /
+                        <MudLink Color="Color.Error" @onclick="() => OpenDeleteDialog(context)">delete</MudLink>
+                    </MudTd>
+                </Authorized>
+            </AuthorizeView>
         </RowTemplate>
         <PagerContent>
             <MudTablePager PageSizeOptions="new int[]{50, 100}" />

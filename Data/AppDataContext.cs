@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using BlazorTemplate.Data;
 
 #pragma warning disable CS8618
-public class AppDataContext : DbContext
+public class AppDataContext : IdentityDbContext
 {
     public AppDataContext(DbContextOptions<AppDataContext> options)
          : base(options)
@@ -13,6 +14,7 @@ public class AppDataContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         var Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"

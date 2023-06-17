@@ -1,6 +1,12 @@
 ﻿@inherits LayoutComponentBase
-@inject NavigationManager NavManager
+@using Microsoft.AspNetCore.Identity
 @using MudBlazor
+@inject NavigationManager NavManager
+@inject SignInManager<IdentityUser> SignInManager
+@inject IHttpClientFactory ClientFactory
+@inject TokenProvider tokenProvider
+@inject HttpClient HttpClient
+
 
 <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
 <MudDialogProvider />
@@ -14,10 +20,31 @@
             Underline="Underline.None">Blazor Template
         </MudLink>
         <MudSpacer />
+        <AuthorizeView>
+            <Authorized>
+                <p>Hello, @context.User.Identity?.Name!</p>
+            </Authorized>
+            <NotAuthorized>
+                <p>You're not authorized.</p>
+            </NotAuthorized>    
+        </AuthorizeView>
         <MudToggleIconButton @bind-Toggled="@_isDarkMode"
                      Icon="@Icons.Material.Filled.DarkMode" Color="Color.Inherit" Title="Dark Mode"
                      ToggledIcon="@Icons.Material.Filled.LightMode" ToggledColor="Color.Inherit" ToggledTitle="Light Mode"/>
-        <MudIconButton OnClick="NavigateToLogin" Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" />
+        <AuthorizeView>
+            <Authorized>
+                <form class="form-inline" method="post" action="/Identity/Account/Logout">
+                    <MudIconButton ButtonType="ButtonType.Submit" Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" />
+                    <input
+                        name="__RequestVerificationToken" type="hidden" 
+                        value="@tokenProvider.AntiforgeryToken"/>
+                </form>
+            </Authorized>
+            <NotAuthorized>
+                <MudIconButton Href="/Identity/Account/Login" OnClick="CloseDrawer" Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" />
+            </NotAuthorized>    
+        </AuthorizeView>
+        
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
@@ -25,7 +52,7 @@
         <NavMenu />
     </MudDrawer>
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="my-4">
             @Body
         </MudContainer>
     </MudMainContent>
@@ -44,11 +71,5 @@
     void CloseDrawer()
     {
         _drawerOpen = false;
-    }
-
-    void NavigateToLogin()
-    {
-        CloseDrawer();
-        NavManager.NavigateTo("/login");
     }
 }

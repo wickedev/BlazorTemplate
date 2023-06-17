@@ -14,7 +14,7 @@ dotnet dev-certs https --trust
 
 ## Docker 환경설정
 
-- `docker compose up -detach` or `docker compose up -d`
+- `docker compose up --detach` or `docker compose up -d`
 
 ## Docker 환경 삭제
 
@@ -28,7 +28,7 @@ dotnet dev-certs https --trust
 
 ## EF Core Undo Previous Migration
 
-- `ef migrations remove`
+- `dotnet ef migrations remove`
 
 ## EF Core Apply Migration
 
